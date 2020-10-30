@@ -1,0 +1,193 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background: #343A40;
+    color: #F8F9FA;
+    position: relative;
+}
+
+h1 {
+    font-size: 48px;
+    text-align: center;
+}
+
+h2 {
+	font-size: 24px;
+}
+
+p {
+	display: inline;
+	font-size: 18px;
+}
+
+div.flexbox {
+	display: flex;
+	justify-content: center;
+	align: middle;
+	margin: 40px 0px;
+}
+
+div.flexbox > h1 {
+	margin: 0px 30px;
+}
+
+code {
+    display: inline;
+	background: #3E464C;
+	font-size: 18px;
+}
+
+code:hover {
+	cursor: pointer;
+	color: #3EC2C2;
+}
+
+code.copy-success:hover {
+	color: #3EC13E;
+}
+
+code.copy-fail:hover {
+	color: #E53939;
+}
+
+code:hover::after {
+	content: 'content_copy';
+	position: absolute;
+	background: #3E464C;
+	color: #3EC2C2;
+	border: 2px solid #F8F9FA;
+	padding: 3px;
+	margin: 3px;
+	border-radius: 5px;
+	font-family: 'Material Icons';
+}
+
+code.copy-success:hover::after {
+	content: 'check';
+	color: #3EC13E;
+}
+
+code.copy-fail:hover::after {
+	content: 'clear';
+	color: #E53939;
+}
+
+#instructions {
+	width: 50%;
+	margin: 0 auto 30px auto;
+}
+
+input {
+    height: 20px;
+    width: 20px;
+    border-radius: 5px;
+    border: none;
+    margin: 0px 5px;
+}
+
+input[type="file"] {
+    height: 32px;
+    width: 140px;
+    border-radius: 5px;
+    font-size: 24px;
+    padding: 4px 10px;
+    border: none;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+#drop-area {
+    padding: 10px 15px;
+    border: 2px solid black;
+    margin: 10px calc(25vw);
+}
+
+#drop-area.highlight {
+    border-color: white;
+}
+
+input[type="text"] {
+    width: 75%;
+    height: 32px;
+    margin: 5px;
+    vertical-align: bottom;
+}
+
+.clear-button {
+    width: 27px;
+    height: 34px;
+    margin: 5px;
+    padding-left: 6px;
+}
+
+label {
+    font-size: 24px;
+    white-space: pre;
+}
+
+button {
+    height: 32px;
+    margin-left: 0;
+    width: 100%;
+    border-radius: 5px;
+    font-size: 24px;
+    padding: 4px 10px;
+    border: none;
+    margin: 20px 40px 20px 0px;
+}
+
+.half-button {
+    height: 32px;
+    margin-left: 0;
+    width: 48%;
+    border-radius: 5px;
+    font-size: 24px;
+    padding: 4px 10px;
+    border: none;
+    margin: 0px !important;
+}
+
+#select-filters {
+    border: 2px solid black;
+    padding: 10px;
+}
+
+#filters {
+    position: fixed;
+    right: calc(75vw);
+    display: none;
+    width: 320px;
+    top: 15vh;
+}
+
+#chances, .piece-table {
+    margin-top: 40px;
+    font-family: 'Roboto', sans-serif;
+    border-collapse: collapse;
+    width: 50%;
+    margin-left: calc(25vw);
+    font-size: 28px;
+}
+
+.adventure-mode {
+    display: none;
+}
+
+#chances td, #chances th, .piece-table td, .piece-table th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+/* .piece-table tr:nth-child(even)  {
+    background-color: #f2f2f2;
+    color: #343a40;
+}*/
+
+#chances th, .piece-table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #70a1ff;
+    color: white;
+}
+

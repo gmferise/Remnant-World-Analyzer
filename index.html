@@ -1,50 +1,53 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+		<title>Remnant World Analyzer</title>
+		<link href="./favicon.png" rel="icon" type="image/png"/>
+		
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"/>
+		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+		
         <!-- Global site tag (gtag.js) - Google Analytics -->
-            <script async src="https://www.googletagmanager.com/gtag/js?id=UA-146791562-1"></script>
-            <script>
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
+		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-146791562-1"></script>
+		<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
 
-              gtag('config', 'UA-146791562-1');
-           </script>
+		  gtag('config', 'UA-146791562-1');
+	   </script>
+		   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="index.css">
-        <script src="index.js?version=2.1"></script>
-
+        
+		<link href="./style.css" rel="stylesheet" type="text/css"/>
+        
+		<script src="./scripts.js"></script>
     </head>
+	
      <body>
-        <h1>Remnant: From the Ashes World Analyzer</h1>
+		<div class='flexbox'>
+			<img src="./favicon.png" width=64 height=64 alt=""/>
+			<h1>Remnant: From the Ashes World Analyzer</h1>
+			<img src="./favicon.png" width=64 height=64 alt=""/>
+		</div>
 
-         <p>
-            How to use:<br>
-            Navigate to C:/Users/YOUR USER NAME/AppData/Local/Remant/Saved/SaveGames and locate the file named something like save_0.bak or save_0.sav. Upload to see what you rolled.<br><br>
-            For Adventure Mode, make sure to use the right side filters to filter by the selected world. Worlds other than what you chose should be ignored as they are just past rolls for those worlds. There is currently no way to determine which world was chosen in adventure mode so the tool lists all of them.
-             <br><br>
-            Known Issues:<br> 
-             Adventure mode seems to not be working correctly, currently working on a fix.<br>
-             Ad block can mess with the tool functionality.<br>
-            <b>You must use the red crystal to travel to the location before the world can be analyzed.<b>
-<br><br>
-            Credits to /u/FAOAB on reddit for this <a href="https://docs.google.com/spreadsheets/d/1VzmDx0ZXQWN5N_9_zP0gEqToyuB9ZjlxgZOEGdiuA6A/edit#gid=2123178902" style='color:white;'> spreadsheet</a> that helped me sort out some of the more confusing names. 
-            <br><br>
+		<div id="instructions">
+			<h2>Usage:</h2>
+			<p>Navigate to </p>
+			<code title="Click to Copy">%localappdata%/Remnant/Saved/SaveGames</code>
+			<p>and choose your save file.</p>
+			<br><br>
+			<p>When re-rolling your worlds, you must travel to them using the red crystal before save-data is generated.</p>
+		</div>
 
-             
-
-
-        </p>
+        
         <div id="drop-area">
-        <input type="file" onchange="loadFile(this)">
-        <p style="text-align: center; font-size:25px;">Choose or drop file</p>
+			<p>Choose or drag &amp; drop file</p>
+			<input type="file">
         </div>
 
         <div id="filters">
             <button id="toggle-adv">Show Adventure Mode</button>
-
-            <br />
 
             <div id="select-filters">
                 <fieldset>
@@ -56,8 +59,6 @@
                 <label><input type="checkbox" id="f-yaesha" class="filter" checked>Yaesha</label>
                 </fieldset>
 
-                <br/>
-
                 <fieldset>
                 <legend>Type:</legend>
                 <label><input type="checkbox" id="f-items" class="filter" checked>Items</label>
@@ -67,8 +68,6 @@
                 <label><input type="checkbox" id="f-minibosses" class="filter" checked>Mini Bosses</label>
                 <label><input type="checkbox" id="f-bosses" class="filter" checked>Bosses</label>
                 </fieldset>
-
-                <br/>
                 
                 <fieldset>
                 <legend>Name filter:</legend>
@@ -76,10 +75,7 @@
                 <label><input type="text" id="f-name" class="filter" placeholder="Input event name filter"></label><button class="clear-button" onclick="document.getElementById('f-name').value=''">X</button>
                 </fieldset>
 
-                <br/>
-
                 <button class="half-button" onclick="updateFilters(false)">Hide all</button> <button class="half-button" onclick="updateFilters(true)">Show all</button>
-                <br/>
                 <button id="apply">Apply</button>
             </div>
         </div>
