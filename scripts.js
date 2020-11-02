@@ -1,5 +1,22 @@
 /// GLOBAL VARS & CONSTANTS
 
+const regions = [
+    'Earth',
+    'Rhom',
+    'Corsus',
+    'Yaesha',
+    'Reisum'
+];
+
+const events = [
+    'Item',
+    'Side Dungeon',
+    'Siege',
+    'Point of Interest',
+    'Mini-Boss',
+    'World Boss'
+];
+
 const sublocations = {
     "RootCultist": "MarrowPass",
     "RootWraith": "TheHiddenSanctum",
@@ -47,74 +64,298 @@ const sublocations = {
 };
 
 const mainLocations = {
- "City Overworld Zone1": "Fairview",
- "City Overworld Zone2": "Westcourt",
- "Wasteland Overworld Zone1": "TheEasternWind",
- "Wasteland Overworld Zone2": "TheScouringWaste",
- "Jungle Overworld Zone1": "TheVerdantStrand",
- "Jungle Overworld Zone2": "TheScaldingGlade",
- "Swamp Overworld Zone1": "TheFetidGlade",
- "Swamp Overworld Zone2": "TheMistFen"
+    "City Overworld Zone1": "Fairview",
+    "City Overworld Zone2": "Westcourt",
+    "Wasteland Overworld Zone1": "TheEasternWind",
+    "Wasteland Overworld Zone2": "TheScouringWaste",
+    "Jungle Overworld Zone1": "TheVerdantStrand",
+    "Jungle Overworld Zone2": "TheScaldingGlade",
+    "Swamp Overworld Zone1": "TheFetidGlade",
+    "Swamp Overworld Zone2": "TheMistFen"
 };
 
-/// EVENT BINDINGS
+const eventNameOverrides = {
+    // Bosses
+    'FlickeringHorror': 'DreamEater',
+    'Wisp': 'HiveWisps',
+    'TheRisen': 'Reanimators',
+    'LizAndLiz': 'LizChicagoTypewriter',
+    'Fatty': 'TheUncleanOne',
+    'WastelandGuardian': 'Claviger',
+    'RootEnt': 'EntBoss',
+    'Wolf': 'TheRavager',
+    'RootDragon': 'Singe',
+    'SwarmMaster': 'Scourge',
+    'RootWraith': 'Shroud',
+    'RootTumbleweed': 'TheMangler',
+    'Kincaller': 'Warden',
+    'Tyrant': 'Thrall',
+    'Vyr': 'ShadeAndShatter',
+    'ImmolatorAndZephyr': 'ScaldAndSear',
+    'RootBrute': 'Gorefist',
+    'SlimeHulk': 'Canker',
+    'BlinkFiend': 'Onslaught',
+    'Sentinel': 'Raze',
+    'Penitent': 'Letos Amulet',
+    'LastWill': 'SupplyRunAssaultRifle',
+    'SwampGuardian': 'Ixillis',
+    'Splitter': 'RiphideLetosArmor',
+    // Items
+    'GunslignersRing': 'GunslingersRing' // yes... they actually made this typo in the save files
+};
+
+var searchTimeout;
+
+/// CONVERSION FUNCTIONS
+
+function humanToId(string) {
+    return string.toLowerCase().replace(/[\s\-\']+/,'-');
+}
+
+/// PAGE LOAD EXECUTION
 
 $(document).ready(function() {
-    $('#apply').on('click', updateTable);
+    
+    // PROCEDURAL ELEMENT GENERATION
+    
+    // Region checkboxes
+    let html = '';
+    for (let i = 0; i < regions.length; i++) {
+        html += `<label>
+                    <input  type="checkbox"
+                            id="fr-${humanToId(regions[i])}"
+                            class="filter"
+                            checked
+                    />
+                    ${regions[i]}
+                </label>`;
+    }
+    document.getElementById('region-filters').innerHTML = html;
+    
+    // Event checkboxes
+    html = '';
+    for (let i = 0; i < events.length; i++) {
+        html += `<label>
+                    <input  type="checkbox"
+                            id="fe-${humanToId(events[i])}"
+                            class="filter"
+                            checked
+                    />
+                    ${events[i]}
+                </label>`;
+    }
+    document.getElementById('event-filters').innerHTML = html;
+    
+    // EVENT BINDINGS
+    
+    // legacy
+    //$('#apply').on('click', updateTable);
+    
+    // Copy text events
 	$('code').on('click', copyCode);
 	$('code').on('mouseleave', (event) => {
-		event.target.classList.remove('copy-success');
-		event.target.classList.remove('copy-fail');
+		event.target.classList.remove(...['green','red']);
 	});
-
-    $('#toggle-adv').on('click', (event) => {
-        $('.main-mode, .adventure-mode').toggle();
-        if (event.target.innerHTML == "Show Adventure Mode") {
-            event.target.innerHTML = "Show Campaign Mode";
-        } else {
-            event.target.innerHTML = "Show Adventure Mode";
-        }
-    });
-
+    
+    // Campaign/Adventure buttons
+    $('.mode-select').on('click', changeMode);
+    
+    // File drop events
+    window.addEventListener('dragenter', startFileDrop);
     let dropArea = document.getElementById('drop-area');
-    dropArea.addEventListener('dragenter', (event) => {
-		event.target.classList.add('highlight');
-	}, false);
-    dropArea.addEventListener('dragover', (event) => {
-		event.target.classList.add('highlight');
-	}, false);
-    dropArea.addEventListener('dragleave', (event) => {
-		event.target.classList.remove('highlight');
-	}, false);
-    dropArea.addEventListener('drop', (event) => {
-		event.target.classList.remove('highlight');
-	}, false);
-	dropArea.addEventListener('change', loadFile);
+    dropArea.addEventListener('dragenter', hoverFileDrop);
+    dropArea.addEventListener('dragover', hoverFileDrop);
+    dropArea.addEventListener('dragleave', finishFileDrop);
+    dropArea.addEventListener('drop', handleFileDrop);
+    
+    // Direct file input
+    document.getElementById('file-input').addEventListener('change', readFile);
+    
+    // Clear file button
+    document.getElementById('clear-file').addEventListener('click', clearFile);
+    
+    // Auto-refresh filter binds
+    $('.filter').on('click', updateTable);
+    
+    // Toggle-all-checkboxes buttons - includes a refresh
+    $('.filter-all').on('click', changeAll);
+    
+    document.getElementById('f-name').addEventListener('beforeinput', timedRefresh);
+    
+    // Clear text filter
+    document.getElementById('clear-filter').addEventListener('click', clearSearch);
+    
 });
 
-/// CLIPBOARD COPY FEATURE
+/// CLIPBOARD COPIER
 
 // Copies textContent of a <code> element to clipboard (bound)
 async function copyCode(event) {
-	if (!navigator.clipboard) { // navigator.clipboard doesn't work in IE only... oh well!
+    // navigator.clipboard doesn't work in IE only... oh well!
+	if (!navigator.clipboard) {
 		return;
 	}
 	try {
 		await navigator.clipboard.writeText(event.target.textContent);
-		event.target.classList.add('copy-success');
+		event.target.classList.add('green');
 		
-	} catch (error) { // just in case, it better be pretty!
+	} catch (error) {
 		console.error("Failed to copy to clipboard", error);
-		event.target.classList.add('copy-fail');
+		event.target.classList.add('red');
 	}
 }
 
-function loadFile(o) {
-    let fr = new FileReader();
-    fr.onload = function(e) {
-        showDataFile(e, o);
+/// FILE INPUT FUNCTIONS
+
+function startFileDrop(event) {
+    document.getElementById('drop-area').classList.add('block');
+}
+
+function finishFileDrop(event) {
+    document.getElementById('drop-area').classList.remove('block');
+}
+
+function hoverFileDrop(event) {
+    event.dataTransfer.dropEffect = 'copy';
+    event.preventDefault();
+}
+
+function handleFileDrop(event) {
+    event.preventDefault();
+    finishFileDrop(event);
+    if (event.dataTransfer.files.length == 1 && event.dataTransfer.files[0].name.match(/\.(sav|bak)$/)) {
+        document.getElementById('file-input').files = event.dataTransfer.files;
+        event.target.files = event.dataTransfer.files;
+        readFile(event);
+    }
+}
+
+function readFile(event) {
+    document.getElementById('clear-file').classList.remove('hidden');
+    let file = event.target.files[0];
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        processFile(event.target.result);
     };
-    fr.readAsText(o.files[0]);
+    reader.readAsText(file); // async --> onload
+    // onload triggers here
+}
+
+function clearFile(event){
+    document.getElementById('file-input').files = new DataTransfer().files;
+    event.target.classList.add('hidden');
+    updateTable();
+}
+
+function processFile(data){
+    $('tr:not(.header-row)').remove();
+
+    let text = data;
+    text = text.split("/Game/Campaign_Main/Quest_Campaign_Ward13.Quest_Campaign_Ward13")[0];
+    main_campaign = text.split("/Game/Campaign_Main/Quest_Campaign_City.Quest_Campaign_City")[1];
+    if (main_campaign) {
+        text = main_campaign.replace(/Game/g,"\n");
+    } else { // subject 2923 campaign
+        text = text.split("/Game/Campaign_Clementine/Quests/WardPrime/Quest_WardPrime_Template.Quest_WardPrime_Template")[0];
+        text = text.split("/Game/World_Rural/Templates/Template_Rural_Overworld_02.Template_Rural_Overworld_02")[1].replace(/Game/g,"\n");
+    }
+
+    textArray = text.split("\n");
+
+    adText = data;
+
+    adText = adText.split("\n");
+    tempList = [];
+    for(i = 0; i < adText.length; i++)
+    {
+        if (String(adText[i]).includes('Adventure') === true)
+        {
+            tempList.push(adText[i]);
+        }
+    }
+    // regardless of campaign type, the last line collected will have our current adventure data
+    adText = tempList[tempList.length - 1];
+   
+    if (adText != undefined) {
+        adventureMode = true;
+        adText = adText.replace(/Game/g,"\n");
+        adTextArray = adText.split("\n");
+    } else {
+        adventureMode = false;
+    }
+
+    if (adventureMode) {
+        getWorldData(adTextArray, "adventure");
+    }
+    getWorldData(textArray, "campaign");
+
+    document.getElementById('table-campaign').parentElement.classList.add('block');
+    document.getElementById('table-adventure').parentElement.classList.add('block');
+}
+
+/// FILTER FUNCTIONS
+
+function changeMode(event) {
+    $('.mode-select').removeClass('locked');
+    event.target.classList.add('locked');
+}
+
+function changeAll(event) {
+    let labels = event.target.parentElement.parentElement.parentElement.children[1].children;
+    let action = event.target.textContent == 'check_circle';
+    for (let i = 0; i < labels.length; i++) {
+        labels[i].children[0].checked = action;
+    }
+    updateTable();
+}
+
+function clearSearch(event) {
+    document.getElementById('f-name').value = '';
+    updateTable();
+}
+
+function timedRefresh(event) {
+    if (!searchTimeout) {
+        clearTimeout(searchTimeout);
+    }
+    searchTimeout = setTimeout(function(){
+        updateTable();  
+    } ,1000);
+}
+
+function updateTable() {
+    $('tr:not(.header-row)').hide();
+
+    // Filter events & regions
+    for (let r = 0; r < regions.length; r++) {
+        for (let e = 0; e < events.length; e++){
+            if (
+                document.getElementById('fe-'+humanToId(events[e])).checked &&
+                document.getElementById('fr-'+humanToId(regions[r])).checked
+            ) {
+               $('tr:not(.header-row)').each(function() { // must use function over () => for $(this) to work
+                    if ($(this).html().search(events[e]) != -1 && 
+                        $(this).html().search(regions[r]) != -1
+                    ) { 
+                        $(this).show();
+                    }
+                }); 
+            }
+        }
+    }
+    
+    // Filter name
+    let name = document.getElementById('f-name').value;
+    if (name.length > 0) {
+        $('tr:not(.header-row)').each(function() {
+            if (
+                $(this).find('td:eq(2)').text().toLowerCase()
+                .search(name.toLowerCase()) == -1
+            ) {
+                $(this).hide();
+            }
+        });
+    }
 }
 
 function getWorldData(textArray, worldMode) {
@@ -127,7 +368,7 @@ function getWorldData(textArray, worldMode) {
 
     var currentMainLocation;
 
-    if (worldMode == "#adventure") {
+    if (worldMode == "adventure") {
         currentMainLocation = textArray[1].split("/")[1].split("_")[1]
     } else {
         currentMainLocation = "Fairview"
@@ -181,7 +422,7 @@ function getWorldData(textArray, worldMode) {
             eventType = "Point of Interest"
             eventName = textLine.split("/")[3].split("_")[2]
             currentSublocation = currentMainLocation
-            if (worldMode == "#adventure") {
+            if (worldMode == "adventure") {
                 currentSublocation = ''
             }
             if (currentSublocation == undefined){
@@ -212,7 +453,7 @@ function getWorldData(textArray, worldMode) {
 
         //look for minibosses
         if (textLine.search("Mini") != -1) {
-            eventType = "Miniboss"
+            eventType = "Mini-Boss"
             eventName = textLine.split("/")[3].split("_")[2]
             currentSublocation = sublocations[eventName]
             if (currentSublocation == undefined){
@@ -222,7 +463,7 @@ function getWorldData(textArray, worldMode) {
 
         //look for Item drops
         if (textLine.search("Quest_Event") != -1) {
-            eventType = "Item Drop"
+            eventType = "Item"
             eventName = textLine.split("/")[3].split("_")[2]
 
             // edge case for out of order items
@@ -275,7 +516,7 @@ function getWorldData(textArray, worldMode) {
                     if (zones[zone][eventType].search(eventName) == -1) {
                         zones[zone][eventType] += ", " + eventName
 
-                        if (worldMode == "#adventure") {
+                        if (worldMode == "adventure") {
                             mainLocationText = ''
                         } else {
                             mainLocationText = currentMainLocation.split(/(?=[A-Z])/).join(' ') + ": "
@@ -285,7 +526,7 @@ function getWorldData(textArray, worldMode) {
                 } else {
                     zones[zone][eventType] = eventName
 
-                        if (worldMode == "#adventure") {
+                        if (worldMode == "adventure") {
                             mainLocationText = ''
                         } else {
                             mainLocationText = currentMainLocation.split(/(?=[A-Z])/).join(' ') + ": "
@@ -293,7 +534,7 @@ function getWorldData(textArray, worldMode) {
 
                         html = "<tr><td>" + zone + ": " + mainLocationText + currentSublocation.split(/(?=[A-Z])/).join(' ') +  "</td><td>" + eventType + "</td><td>" + eventName.split(/(?=[A-Z])/).join(' ') + "</td></tr>"
                 }
-                $(worldMode).append(html)
+                $('#table-'+worldMode).append(html)
             }
             $('#filters').show()
         }
@@ -301,138 +542,4 @@ function getWorldData(textArray, worldMode) {
 
 }
 
-updateFilters = function(checked) {
-    $('.filter').each((i,f) => {
-        try {
-            f.checked=checked
-        }
-        catch {}
-    })
 
-    if (checked) {
-        document.getElementById('f-name').value = ""
-    }
-}
-
-function showDataFile(e, o){
-    $('tr:not(.header-row)').remove()
-
-    updateFilters(true)
-
-    text = e.target.result
-    text = text.split("/Game/Campaign_Main/Quest_Campaign_Ward13.Quest_Campaign_Ward13")[0]
-    main_campaign = text.split("/Game/Campaign_Main/Quest_Campaign_City.Quest_Campaign_City")[1]
-    if (main_campaign) {
-        text = main_campaign.replace(/Game/g,"\n")
-    } else { // subject 2923 campaign
-        text = text.split("/Game/Campaign_Clementine/Quests/WardPrime/Quest_WardPrime_Template.Quest_WardPrime_Template")[0]
-        text = text.split("/Game/World_Rural/Templates/Template_Rural_Overworld_02.Template_Rural_Overworld_02")[1].replace(/Game/g,"\n")
-    }
-
-    textArray = text.split("\n")
-
-    adText = e.target.result
-
-    adText = adText.split("\n")
-    tempList = []
-    for(i = 0; i < adText.length; i++)
-    {
-        if (String(adText[i]).includes('Adventure') === true)
-        {
-            tempList.push(adText[i])
-        }
-    }
-    // regardless of campaign type, the last line collected will have our current adventure data
-    adText = tempList[tempList.length - 1]
-   
-    if (adText != undefined) {
-        adventureMode = true
-        adText = adText.replace(/Game/g,"\n")
-        adTextArray = adText.split("\n")
-    } else {
-        adventureMode = false
-    }
-
-    if (adventureMode) {
-        getWorldData(adTextArray, "#adventure")
-    }
-    getWorldData(textArray, "#main")
-
-    $('.main-mode').show()
-    $('.adventure-mode').hide()
-    $('#toggle-adv').text("Show Adventure Mode")
-}
-
-updateTable = function() {
-    $('tr:not(.header-row)').hide()
-
-    //Type
-    if (document.getElementById('f-items').checked) {
-        $('td').each(function() {
-            if ($(this).text().search('Item Drop') != -1) {
-                $(this).parent().show()
-            }
-        })
-    }
-    if (document.getElementById('f-sidedgs').checked) {
-        $('td').each(function() {
-            if ($(this).text().search('Side Dungeon') != -1) {
-                $(this).parent().show()
-            }
-        })
-    }
-    if (document.getElementById('f-sieges').checked) {
-        $('td').each(function() {
-            if ($(this).text().search('Siege') != -1) {
-                $(this).parent().show()
-            }
-        })
-    }
-    if (document.getElementById('f-poi').checked) {
-        $('td').each(function() {
-            if ($(this).text().search('Point of Interest') != -1) {
-                $(this).parent().show()
-            }
-        })
-    }
-    if (document.getElementById('f-minibosses').checked) {
-        $('td').each(function() {
-            if ($(this).text().search('Miniboss') != -1) {
-                $(this).parent().show()
-            }
-        })
-    }
-    if (document.getElementById('f-bosses').checked) {
-        $('td').each(function() {
-            if ($(this).text().search('World Boss') != -1) {
-                $(this).parent().show()
-            }
-        })
-    }
-
-    //Regions
-    earth = document.getElementById('f-earth').checked
-    rhom = document.getElementById('f-rhom').checked
-    corsus = document.getElementById('f-corsus').checked
-    yaesha = document.getElementById('f-yaesha').checked
-    $('td').each(function() {
-        if (
-        ($(this).text().search('Earth')!=-1 && !earth) ||
-        ($(this).text().search('Rhom')!=-1 && !rhom) ||
-        ($(this).text().search('Corsus')!=-1 && !corsus) ||
-        ($(this).text().search('Yaesha')!=-1 && !yaesha))
-        {
-            $(this).parent().hide()
-        }
-    })
-
-    //Name filter
-    name = document.getElementById('f-name').value
-    if (name.length>0) {
-        jQuery('tr:not(.header-row)').each(function() {
-            if ($(this).find('td:eq(2)').text().toLowerCase().search(name.toLowerCase())==-1) {
-                $(this).hide()
-            }
-        })
-    }
-}

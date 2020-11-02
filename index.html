@@ -6,17 +6,7 @@
 		
         <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet"/>
 		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
-		
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-146791562-1"></script>
-		<script>
-		  window.dataLayer = window.dataLayer || [];
-		  function gtag(){dataLayer.push(arguments);}
-		  gtag('js', new Date());
-
-		  gtag('config', 'UA-146791562-1');
-	   </script>
-		   
+			   
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         
 		<link href="./style.css" rel="stylesheet" type="text/css"/>
@@ -25,94 +15,110 @@
     </head>
 	
      <body>
-		<div class='flexbox'>
+        <div id="drop-area" class="material-icons">system_update_alt</div>
+        
+		<div class="hflex">
 			<img src="./favicon.png" width=64 height=64 alt=""/>
 			<h1>Remnant: From the Ashes World Analyzer</h1>
 			<img src="./favicon.png" width=64 height=64 alt=""/>
 		</div>
-
-		<div id="instructions">
-			<h2>Usage:</h2>
-			<p>Navigate to </p>
-			<code title="Click to Copy">%localappdata%/Remnant/Saved/SaveGames</code>
-			<p>and choose your save file.</p>
-			<br><br>
-			<p>When re-rolling your worlds, you must travel to them using the red crystal before save-data is generated.</p>
-		</div>
-
         
-        <div id="drop-area">
-			<p>Choose or drag &amp; drop file</p>
-			<input type="file">
-        </div>
+        <div class="hflex">
+            <div class="hexpand">
+                <div id="filters">
+                    <div class="hflex">
+                        <button title="Switch to Campaign" class="mode-select locked">Campaign</button>
+                        <button title="Switch to Adventure" class="mode-select">Adventure</button>
+                    </div>
 
-        <div id="filters">
-            <button id="toggle-adv">Show Adventure Mode</button>
+                    <div id="select-filters" class="bordered">
+                        <fieldset class="hflex"> <legend>Location</legend>
+                        <div class="hexpand" id="region-filters">
+                        </div>
+                        <div>
+                            <label><button title="Select All" class="filter-all green material-icons">check_circle</button></label>
+                            <label><button title="Deselct All" class="filter-all red material-icons">unpublished</button></label>
+                        </div>
+                        </fieldset>
 
-            <div id="select-filters">
-                <fieldset>
-                <legend>Regions:</legend>
-
-                <label><input type="checkbox" id="f-earth" class="filter" checked>Earth</label>
-                <label><input type="checkbox" id="f-rhom" class="filter" checked>Rhom</label>
-                <label><input type="checkbox" id="f-corsus" class="filter" checked>Corsus</label>
-                <label><input type="checkbox" id="f-yaesha" class="filter" checked>Yaesha</label>
-                </fieldset>
-
-                <fieldset>
-                <legend>Type:</legend>
-                <label><input type="checkbox" id="f-items" class="filter" checked>Items</label>
-                <label><input type="checkbox" id="f-sidedgs" class="filter" checked>Side Dungeons</label>
-                <label><input type="checkbox" id="f-sieges" class="filter" checked>Sieges</label>
-                <label><input type="checkbox" id="f-poi" class="filter" checked>Points of Interest</label>
-                <label><input type="checkbox" id="f-minibosses" class="filter" checked>Mini Bosses</label>
-                <label><input type="checkbox" id="f-bosses" class="filter" checked>Bosses</label>
-                </fieldset>
-                
-                <fieldset>
-                <legend>Name filter:</legend>
-
-                <label><input type="text" id="f-name" class="filter" placeholder="Input event name filter"></label><button class="clear-button" onclick="document.getElementById('f-name').value=''">X</button>
-                </fieldset>
-
-                <button class="half-button" onclick="updateFilters(false)">Hide all</button> <button class="half-button" onclick="updateFilters(true)">Show all</button>
-                <button id="apply">Apply</button>
+                        <fieldset class="hflex"> <legend>Event Type</legend>
+                        <div class="hexpand" id="event-filters">
+                        </div>
+                        <div>
+                            <label><button title="Select All" class="filter-all green material-icons">check_circle</button></label>
+                            <label><button title="Deselct All" class="filter-all red material-icons">unpublished</button></label>
+                        </div>
+                        </fieldset>
+                        
+                        <fieldset class="hflex"> <legend>Event Name</legend>
+                            <label><input type="text" id="f-name" placeholder="Ex: Trait Book"/></label>
+                            <label><button id="clear-filter" title="Clear Search" class="material-icons red">search_off</button></label>
+                        </fieldset>
+                    </div>
+                </div>
             </div>
+            
+            <div class="hexpand">
+                <div id="instructions">
+                    <h2>Usage:</h2>
+                    <p>Navigate to </p>
+                    <code title="Click to Copy">%localappdata%/Remnant/Saved/SaveGames</code>
+                    <p>and choose your save file.</p>
+                    <br><br>
+                    <p>It will have a name like save_0.sav or save_0.bak with the number changing depending on your save slot.</p>
+                    <br><br>
+                    <p>When re-rolling your worlds, you must travel to them using the red crystal before world data can be analyzed.</p>
+                    <br><br>
+                    
+                    <div class="bordered">
+                        <h3>Upload or drag &amp; drop file</h3>
+                        <div class="hflex">
+                            <input id="file-input" type="file" accept=".sav,.bak"/>
+                            <button id="clear-file" title="Clear File" title="Clear" class="material-icons red hidden">clear</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="tables">
+                    <table class="piece-table">
+                        <thead>
+                            <tr class="header-row">
+                                <th class="headerSort" tabindex="0" role="columnheader button">Location
+                                </th>
+                                <th class="headerSort" tabindex="0" role="columnheader button">Event Type
+                                </th>
+                                 <th class="headerSort" tabindex="0" role="columnheader button">Event Name
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-campaign">
+                            
+                        </tbody>
+                        <tfoot></tfoot>
+                    </table>
+
+                     <table class="piece-table">
+                        <thead>
+                            <tr class="header-row">
+                                <th class="headerSort" tabindex="0" role="columnheader button">Location
+                                </th>
+                                <th class="headerSort" tabindex="0" role="columnheader button">Event Type
+                                </th>
+                                 <th class="headerSort" tabindex="0" role="columnheader button">Event Name
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-adventure">
+                            
+                        </tbody>
+                        <tfoot></tfoot>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Room for future panel -->
+            <div class="hexpand"></div>
+            
         </div>
-
-
-        <table class="piece-table main-mode" style="display:none;">
-            <thead>
-                <tr class="header-row">
-                    <th class="headerSort" tabindex="0" role="columnheader button">Location
-                    </th>
-                    <th class="headerSort" tabindex="0" role="columnheader button">Event Type
-                    </th>
-                     <th class="headerSort" tabindex="0" role="columnheader button">Event Name
-                    </th>
-                </tr>
-            </thead>
-            <tbody id="main">
-                
-            </tbody>
-            <tfoot></tfoot>
-        </table>
-
-         <table class="piece-table adventure-mode">
-            <thead>
-                <tr class="header-row">
-                    <th class="headerSort" tabindex="0" role="columnheader button">Location
-                    </th>
-                    <th class="headerSort" tabindex="0" role="columnheader button">Event Type
-                    </th>
-                     <th class="headerSort" tabindex="0" role="columnheader button">Event Name
-                    </th>
-                </tr>
-            </thead>
-            <tbody id="adventure">
-                
-            </tbody>
-            <tfoot></tfoot>
-        </table>
     </body>
 </html>
