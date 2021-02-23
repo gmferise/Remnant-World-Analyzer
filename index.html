@@ -14,14 +14,14 @@
 <body>
   <div id="drop-area" class="material-icons">system_update_alt</div>
 
-  <div class="hflex">
+  <header>
     <img src="./favicon.png" width=64 height=64 alt="" />
     <h1>Remnant: From the Ashes World Analyzer</h1>
     <img src="./favicon.png" width=64 height=64 alt="" />
-  </div>
+  </header>
 
-  <div class="hflex">
-    <div class="hexpand">
+  <main>
+    <div id="filter-gap">
       <div id="filters">
         <div class="hflex">
           <button title="Switch to Campaign" class="mode-select locked">Campaign</button>
@@ -54,7 +54,7 @@
       </div>
     </div>
 
-    <div class="hexpand">
+    <div id="io-gap">
       <div id="instructions">
         <h2>Usage:</h2>
         <p>Navigate to </p>
@@ -101,13 +101,10 @@
           <tfoot></tfoot>
         </table>
       </div>
-    </div>
+    </div> 
 
-    <!-- Room for future panel -->
-    <div class="hexpand"></div>
-
-  </div>
-  <script src="./scripts.js"></script>
+  </main>
+  <script type="module" src="./index.js"></script>
 </body>
 
 </html>
